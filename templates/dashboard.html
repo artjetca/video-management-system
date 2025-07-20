@@ -1,12 +1,12 @@
 {% extends "base.html" %}
 
-{% block title %}仪表板 - 视频管理系统{% endblock %}
+{% block title %}Panel de Control - Sistema de Gestión de Videos{% endblock %}
 
 {% block content %}
 <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
     <h1 class="h2">
         <i class="fas fa-tachometer-alt me-2 text-primary"></i>
-        仪表板
+        Panel de Control
     </h1>
     <div class="btn-toolbar mb-2 mb-md-0">
         <div class="btn-group me-2">
@@ -18,7 +18,7 @@
     </div>
 </div>
 
-<!-- 统计卡片 -->
+<!-- Tarjetas de estadísticas -->
 <div class="row mb-4">
     <div class="col-xl-3 col-md-6 mb-4">
         <div class="card border-left-primary shadow h-100 py-2">
@@ -26,7 +26,7 @@
                 <div class="row no-gutters align-items-center">
                     <div class="col mr-2">
                         <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
-                            活跃视频
+                            Videos Activos
                         </div>
                         <div class="h5 mb-0 font-weight-bold text-gray-800">{{ active_videos }}</div>
                     </div>
@@ -44,7 +44,7 @@
                 <div class="row no-gutters align-items-center">
                     <div class="col mr-2">
                         <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
-                            归档视频
+                            Videos Archivados
                         </div>
                         <div class="h5 mb-0 font-weight-bold text-gray-800">{{ archived_videos }}</div>
                     </div>
@@ -62,7 +62,7 @@
                 <div class="row no-gutters align-items-center">
                     <div class="col mr-2">
                         <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
-                            总计视频
+                            Total de Videos
                         </div>
                         <div class="h5 mb-0 font-weight-bold text-gray-800">{{ active_videos + archived_videos }}</div>
                     </div>
@@ -80,13 +80,13 @@
                 <div class="row no-gutters align-items-center">
                     <div class="col mr-2">
                         <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
-                            管理员权限
+                            Permisos de Administrador
                         </div>
                         <div class="h5 mb-0 font-weight-bold text-gray-800">
                             {% if session.is_admin %}
-                                <i class="fas fa-check-circle text-success"></i> 已启用
+                                <i class="fas fa-check-circle text-success"></i> Habilitado
                             {% else %}
-                                <i class="fas fa-times-circle text-danger"></i> 未启用
+                                <i class="fas fa-times-circle text-danger"></i> Deshabilitado
                             {% endif %}
                         </div>
                     </div>
@@ -99,7 +99,7 @@
     </div>
 </div>
 
-<!-- 快速操作 -->
+<!-- Acciones rápidas -->
 {% if session.is_admin %}
 <div class="row mb-4">
     <div class="col-12">
@@ -107,7 +107,7 @@
             <div class="card-header">
                 <h5 class="mb-0">
                     <i class="fas fa-bolt me-2"></i>
-                    快速操作
+                    Acciones Rápidas
                 </h5>
             </div>
             <div class="card-body">
@@ -115,7 +115,7 @@
                     <div class="col-md-4 mb-3">
                         <a href="{{ url_for('add_video') }}" class="btn btn-primary btn-lg w-100">
                             <i class="fas fa-plus-circle me-2"></i>
-                            添加新视频
+                            Agregar Nuevo Video
                         </a>
                     </div>
                     <div class="col-md-4 mb-3">

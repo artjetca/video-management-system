@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}登录 - 视频管理系统{% endblock %}
+{% block title %}Iniciar Sesión - Sistema de Gestión de Videos{% endblock %}
 
 {% block content %}
 <div class="container-fluid vh-100">
@@ -8,20 +8,20 @@
         <div class="col-lg-6 d-none d-lg-flex align-items-center justify-content-center" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
             <div class="text-center text-white">
                 <i class="fas fa-video display-1 mb-4"></i>
-                <h2 class="mb-3">视频管理系统</h2>
-                <p class="lead">专业的视频内容管理平台</p>
+                <h2 class="mb-3">Sistema de Gestión de Videos</h2>
+                <p class="lead">Plataforma profesional de gestión de contenido de video</p>
                 <div class="mt-4">
                     <div class="d-flex align-items-center justify-content-center mb-2">
                         <i class="fas fa-check-circle me-2"></i>
-                        <span>安全的视频存储</span>
+                        <span>Almacenamiento de video seguro</span>
                     </div>
                     <div class="d-flex align-items-center justify-content-center mb-2">
                         <i class="fas fa-check-circle me-2"></i>
-                        <span>Google Drive 集成</span>
+                        <span>Integración con Google Drive</span>
                     </div>
                     <div class="d-flex align-items-center justify-content-center">
                         <i class="fas fa-check-circle me-2"></i>
-                        <span>便捷的管理界面</span>
+                        <span>Interfaz de administración conveniente</span>
                     </div>
                 </div>
             </div>
@@ -33,37 +33,37 @@
                     <div class="card-body p-5">
                         <div class="text-center mb-4">
                             <i class="fas fa-user-shield text-primary display-4 mb-3"></i>
-                            <h3 class="card-title">管理员登录</h3>
-                            <p class="text-muted">请输入您的登录凭据</p>
+                            <h3 class="card-title">Iniciar Sesión de Administrador</h3>
+                            <p class="text-muted">Por favor ingrese sus credenciales de acceso</p>
                         </div>
                         
                         <form method="POST">
                             <div class="mb-3">
                                 <label for="username" class="form-label">
-                                    <i class="fas fa-user me-2"></i>用户名或邮箱
+                                    <i class="fas fa-user me-2"></i>Nombre de usuario o correo
                                 </label>
                                 <input type="text" class="form-control form-control-lg" id="username" name="username" required>
                             </div>
                             
                             <div class="mb-4">
                                 <label for="password" class="form-label">
-                                    <i class="fas fa-lock me-2"></i>密码
+                                    <i class="fas fa-lock me-2"></i>Contraseña
                                 </label>
                                 <input type="password" class="form-control form-control-lg" id="password" name="password" required>
                             </div>
                             
                             <button type="submit" class="btn btn-primary btn-lg w-100 mb-3">
-                                <i class="fas fa-sign-in-alt me-2"></i>登录
+                                <i class="fas fa-sign-in-alt me-2"></i>Iniciar Sesión
                             </button>
                         </form>
                         
                         <div class="mt-4 p-3 bg-light rounded">
                             <h6 class="text-muted mb-2">
-                                <i class="fas fa-info-circle me-2"></i>默认登录凭据：
+                                <i class="fas fa-info-circle me-2"></i>Credenciales predeterminadas:
                             </h6>
                             <div class="small">
-                                <strong>用户名:</strong> admin 或 admin@example.com<br>
-                                <strong>密码:</strong> admin123
+                                <strong>Usuario:</strong> admin o admin@example.com<br>
+                                <strong>Contraseña:</strong> admin123
                             </div>
                         </div>
                     </div>

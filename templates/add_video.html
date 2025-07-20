@@ -1,18 +1,18 @@
 {% extends "base.html" %}
 
-{% block title %}添加视频 - 视频管理系统{% endblock %}
+{% block title %}Agregar Video - Sistema de Gestión de Videos{% endblock %}
 
 {% block content %}
 <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
     <h1 class="h2">
         <i class="fas fa-plus-circle me-2 text-primary"></i>
-        添加新视频
+        Agregar Nuevo Video
     </h1>
     <div class="btn-toolbar mb-2 mb-md-0">
         <div class="btn-group me-2">
             <a href="{{ url_for('videos') }}" class="btn btn-sm btn-outline-secondary">
                 <i class="fas fa-arrow-left me-1"></i>
-                返回列表
+                Volver a la Lista
             </a>
         </div>
     </div>
@@ -24,7 +24,7 @@
             <div class="card-header bg-primary text-white">
                 <h5 class="mb-0">
                     <i class="fas fa-video me-2"></i>
-                    视频信息
+                    Información del Video
                 </h5>
             </div>
             <div class="card-body">
@@ -33,10 +33,10 @@
                         <div class="col-md-12 mb-3">
                             <label for="title" class="form-label">
                                 <i class="fas fa-heading me-2"></i>
-                                视频标题 <span class="text-danger">*</span>
+                                Título del Video <span class="text-danger">*</span>
                             </label>
-                            <input type="text" class="form-control form-control-lg" id="title" name="title" required placeholder="输入视频标题...">
-                            <div class="form-text">请输入一个描述性的视频标题</div>
+                            <input type="text" class="form-control form-control-lg" id="title" name="title" required placeholder="Ingrese el título del video...">
+                            <div class="form-text">Por favor ingrese un título descriptivo para el video</div>
                         </div>
                     </div>
 

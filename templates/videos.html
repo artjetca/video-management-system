@@ -1,12 +1,12 @@
 {% extends "base.html" %}
 
-{% block title %}视频列表 - 视频管理系统{% endblock %}
+{% block title %}Lista de Videos - Sistema de Gestión de Videos{% endblock %}
 
 {% block content %}
 <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
     <h1 class="h2">
         <i class="fas fa-play-circle me-2 text-primary"></i>
-        {% if show_archived %}归档视频{% else %}视频列表{% endif %}
+        {% if show_archived %}Videos Archivados{% else %}Lista de Videos{% endif %}
     </h1>
     <div class="btn-toolbar mb-2 mb-md-0">
         {% if session.is_admin %}
@@ -20,11 +20,11 @@
         <div class="btn-group">
             <a href="{{ url_for('videos') }}" class="btn btn-sm {% if not show_archived %}btn-primary{% else %}btn-outline-primary{% endif %}">
                 <i class="fas fa-play-circle me-1"></i>
-                活跃视频
+                Videos Activos
             </a>
             <a href="{{ url_for('videos', archived=1) }}" class="btn btn-sm {% if show_archived %}btn-warning{% else %}btn-outline-warning{% endif %}">
                 <i class="fas fa-archive me-1"></i>
-                归档视频
+                Videos Archivados
             </a>
         </div>
     </div>
@@ -48,11 +48,11 @@
                         <div class="d-flex gap-2">
                             <button type="submit" class="btn btn-primary">
                                 <i class="fas fa-search me-1"></i>
-                                搜索
+                                Buscar
                             </button>
                             <a href="{{ url_for('videos', archived=show_archived|int) }}" class="btn btn-outline-secondary">
                                 <i class="fas fa-times me-1"></i>
-                                清除
+                                Limpiar
                             </a>
                         </div>
                     </div>
@@ -65,14 +65,14 @@
     </div>
 </div>
 
-<!-- 视频列表 -->
+<!-- Lista de videos -->
 <div class="row">
     <div class="col-12">
         <div class="card">
             <div class="card-header">
                 <h5 class="mb-0">
                     <i class="fas fa-list me-2"></i>
-                    视频列表 ({{ videos|length }} 个视频)
+                    Lista de Videos ({{ videos|length }} videos)
                 </h5>
             </div>
             <div class="card-body">
@@ -81,12 +81,12 @@
                     <table class="table table-hover">
                         <thead class="table-light">
                             <tr>
-                                <th>标题</th>
-                                <th>描述</th>
-                                <th>过期日期</th>
-                                <th>观看次数</th>
-                                <th>状态</th>
-                                <th>操作</th>
+                                <th>TÍTULO</th>
+                                <th>DESCRIPCIÓN</th>
+                                <th>FECHA DE EXPIRACIÓN</th>
+                                <th>VISTAS</th>
+                                <th>ESTADO</th>
+                                <th>ACCIONES</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -98,14 +98,14 @@
                                         <div>
                                             <strong>{{ video[1] }}</strong>
                                             {% if video[3] %}
-                                            <br><small class="text-muted">文件: {{ video[3] }}</small>
+                                             <br><small class="text-muted">Archivo: {{ video[3] }}</small>
                                             {% endif %}
                                         </div>
                                     </div>
                                 </td>
                                 <td>
                                     <span class="text-muted">
-                                        {{ video[2][:100] + '...' if video[2] and video[2]|length > 100 else video[2] or '无描述' }}
+                                         {{ video[2][:100] + '...' if video[2] and video[2]|length > 100 else video[2] or 'Sin descripción' }}
                                     </span>
                                 </td>
                                 <td>
@@ -124,54 +124,54 @@
                                 <td>
                                     <span class="badge bg-info">
                                         <i class="fas fa-eye me-1"></i>
-                                        {{ video[8] or 0 }} 次
+                                         {{ video[8] or 0 }} vistas
                                     </span>
                                 </td>
                                 <td>
                                     {% if video[6] %}
                                         <span class="badge bg-warning">
                                             <i class="fas fa-archive me-1"></i>
-                                            已归档
+                                             Archivado
                                         </span>
                                     {% elif video[7] and video[7] < moment().format('YYYY-MM-DD HH:mm:ss') %}
                                         <span class="badge bg-danger">
                                             <i class="fas fa-clock me-1"></i>
-                                            已过期
+                                             Expirado
                                         </span>
                                     {% else %}
                                         <span class="badge bg-success">
                                             <i class="fas fa-check-circle me-1"></i>
-                                            活跃
+                                            Activo
                                         </span>
                                     {% endif %}
                                     {% if not video[8] %}
                                         <span class="badge bg-secondary ms-1">
                                             <i class="fas fa-ban me-1"></i>
-                                            禁止下载
+                                            Descarga Prohibida
                                         </span>
                                     {% endif %}
                                 </td>
                                 <td>
                                     <div class="btn-group btn-group-sm">
                                         {% if not video[6] and (not video[7] or video[7] >= moment().format('YYYY-MM-DD HH:mm:ss')) %}
-                                        <a href="{{ url_for('watch_video', video_id=video[0]) }}" class="btn btn-primary" title="播放">
+                                         <a href="{{ url_for('watch_video', video_id=video[0]) }}" class="btn btn-primary" title="Reproducir">
                                             <i class="fas fa-play"></i>
                                         </a>
                                         {% endif %}
                                         {% if session.is_admin %}
-                                        <a href="{{ url_for('edit_video', video_id=video[0]) }}" class="btn btn-outline-primary" title="编辑">
+                                         <a href="{{ url_for('edit_video', video_id=video[0]) }}" class="btn btn-outline-primary" title="Editar">
                                             <i class="fas fa-edit"></i>
                                         </a>
                                         {% if video[6] %}
-                                            <a href="{{ url_for('restore_video', video_id=video[0]) }}" class="btn btn-outline-success" title="恢复" onclick="return confirm('确定要恢复这个视频吗？')">
+                                             <a href="{{ url_for('restore_video', video_id=video[0]) }}" class="btn btn-outline-success" title="Restaurar" onclick="return confirm('¿Está seguro de que desea restaurar este video?')">
                                                 <i class="fas fa-undo"></i>
                                             </a>
                                         {% else %}
-                                            <a href="{{ url_for('archive_video', video_id=video[0]) }}" class="btn btn-outline-warning" title="归档" onclick="return confirm('确定要归档这个视频吗？')">
+                                             <a href="{{ url_for('archive_video', video_id=video[0]) }}" class="btn btn-outline-warning" title="Archivar" onclick="return confirm('¿Está seguro de que desea archivar este video?')">
                                                 <i class="fas fa-archive"></i>
                                             </a>
                                         {% endif %}
-                                        <a href="{{ url_for('delete_video', video_id=video[0]) }}" class="btn btn-outline-danger" title="删除" onclick="return confirm('确定要永久删除这个视频吗？此操作不可撤销！')">
+                                         <a href="{{ url_for('delete_video', video_id=video[0]) }}" class="btn btn-outline-danger" title="Eliminar" onclick="return confirm('¿Está seguro de que desea eliminar permanentemente este video? ¡Esta acción no se puede deshacer!')">
                                             <i class="fas fa-trash"></i>
                                         </a>
                                         {% endif %}
