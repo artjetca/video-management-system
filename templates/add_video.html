@@ -1,0 +1,268 @@
+{% extends "base.html" %}
+
+{% block title %}添加视频 - 视频管理系统{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h1 class="h2">
+        <i class="fas fa-plus-circle me-2 text-primary"></i>
+        添加新视频
+    </h1>
+    <div class="btn-toolbar mb-2 mb-md-0">
+        <div class="btn-group me-2">
+            <a href="{{ url_for('videos') }}" class="btn btn-sm btn-outline-secondary">
+                <i class="fas fa-arrow-left me-1"></i>
+                返回列表
+            </a>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-8 mx-auto">
+        <div class="card shadow">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">
+                    <i class="fas fa-video me-2"></i>
+                    视频信息
+                </h5>
+            </div>
+            <div class="card-body">
+                <form method="POST" enctype="multipart/form-data" id="videoForm">
+                    <div class="row">
+                        <div class="col-md-12 mb-3">
+                            <label for="title" class="form-label">
+                                <i class="fas fa-heading me-2"></i>
+                                视频标题 <span class="text-danger">*</span>
+                            </label>
+                            <input type="text" class="form-control form-control-lg" id="title" name="title" required placeholder="输入视频标题...">
+                            <div class="form-text">请输入一个描述性的视频标题</div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-12 mb-3">
+                            <label for="description" class="form-label">
+                                <i class="fas fa-align-left me-2"></i>
+                                视频描述
+                            </label>
+                            <textarea class="form-control" id="description" name="description" rows="4" placeholder="输入视频描述..."></textarea>
+                            <div class="form-text">详细描述视频内容，帮助其他用户了解视频</div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-12 mb-3">
+                            <label for="google_drive_url" class="form-label">
+                                <i class="fab fa-google-drive me-2"></i>
+                                Google Drive 链接 <span class="text-danger">*</span>
+                            </label>
+                            <input type="url" class="form-control" id="google_drive_url" name="google_drive_url" placeholder="https://drive.google.com/file/d/YOUR_FILE_ID/view" required>
+                            <div class="form-text">
+                                <i class="fas fa-info-circle me-1"></i>
+                                请提供 Google Drive 视频的共享链接，系统将自动提取文件 ID
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="expiry_date" class="form-label">
+                                <i class="fas fa-calendar-times me-2"></i>
+                                过期日期
+                            </label>
+                            <input type="datetime-local" class="form-control" id="expiry_date" name="expiry_date">
+                            <div class="form-text">
+                                <i class="fas fa-info-circle me-1"></i>
+                                可选：设置视频过期日期，过期后将无法播放
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">
+                                <i class="fas fa-download me-2"></i>
+                                下载设置
+                            </label>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="allow_download" name="allow_download">
+                                <label class="form-check-label" for="allow_download">
+                                    允许下载视频
+                                </label>
+                                <div class="form-text">
+                                    <i class="fas fa-shield-alt me-1"></i>
+                                    不勾选可防止用户下载视频（推荐）
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-12 mb-4">
+                            <label for="file" class="form-label">
+                                <i class="fas fa-upload me-2"></i>
+                                上传视频文件
+                            </label>
+                            <input type="file" class="form-control" id="file" name="file" accept="video/*">
+                            <div class="form-text">
+                                <i class="fas fa-info-circle me-1"></i>
+                                可选：支持常见视频格式 (MP4, AVI, MOV 等)，最大文件大小 500MB
+                            </div>
+                            <div id="fileInfo" class="mt-2"></div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-12">
+                            <div class="alert alert-info">
+                                <i class="fas fa-lightbulb me-2"></i>
+                                <strong>提示：</strong>
+                                请提供 Google Drive 视频链接。系统将自动提取文件 ID 并生成受保护的播放链接。
+                                您也可以同时上传本地文件作为备份。
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-between">
+                        <a href="{{ url_for('videos') }}" class="btn btn-secondary">
+                            <i class="fas fa-times me-2"></i>
+                            取消
+                        </a>
+                        <button type="submit" class="btn btn-primary btn-lg" id="submitBtn">
+                            <i class="fas fa-save me-2"></i>
+                            添加视频
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- 上传进度 -->
+        <div class="card mt-4" id="uploadProgress" style="display: none;">
+            <div class="card-body">
+                <h6 class="card-title">
+                    <i class="fas fa-spinner fa-spin me-2"></i>
+                    正在上传...
+                </h6>
+                <div class="progress">
+                    <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style="width: 0%"></div>
+                </div>
+                <small class="text-muted mt-2 d-block">请不要关闭页面，上传完成后会自动跳转</small>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const form = document.getElementById('videoForm');
+        const fileInput = document.getElementById('file');
+        const fileInfo = document.getElementById('fileInfo');
+        const submitBtn = document.getElementById('submitBtn');
+        const uploadProgress = document.getElementById('uploadProgress');
+
+        // 文件选择处理
+        fileInput.addEventListener('change', function() {
+            const file = this.files[0];
+            if (file) {
+                const fileSize = (file.size / 1024 / 1024).toFixed(2);
+                const fileName = file.name;
+                
+                fileInfo.innerHTML = `
+                    <div class="alert alert-success">
+                        <i class="fas fa-file-video me-2"></i>
+                        <strong>已选择文件：</strong> ${fileName} (${fileSize} MB)
+                    </div>
+                `;
+
+                // 检查文件大小
+                if (file.size > 500 * 1024 * 1024) {
+                    fileInfo.innerHTML = `
+                        <div class="alert alert-danger">
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            <strong>文件过大：</strong> ${fileName} (${fileSize} MB)<br>
+                            最大允许文件大小为 500MB
+                        </div>
+                    `;
+                    submitBtn.disabled = true;
+                } else {
+                    submitBtn.disabled = false;
+                }
+            } else {
+                fileInfo.innerHTML = '';
+                submitBtn.disabled = false;
+            }
+        });
+
+        // 表单提交处理
+        form.addEventListener('submit', function(e) {
+            const title = document.getElementById('title').value.trim();
+            const googleDriveUrl = document.getElementById('google_drive_url').value.trim();
+            const expiryDate = document.getElementById('expiry_date').value;
+
+            if (!title) {
+                alert('请输入视频标题');
+                e.preventDefault();
+                return;
+            }
+
+            if (!googleDriveUrl) {
+                alert('请提供 Google Drive 视频链接');
+                e.preventDefault();
+                return;
+            }
+
+            // 验证 Google Drive 链接格式
+            const drivePattern = /drive\.google\.com\/(file\/d\/|open\?id=)/;
+            if (!drivePattern.test(googleDriveUrl)) {
+                alert('请提供有效的 Google Drive 链接');
+                e.preventDefault();
+                return;
+            }
+
+            // 验证过期日期
+            if (expiryDate) {
+                const expiry = new Date(expiryDate);
+                const now = new Date();
+                if (expiry <= now) {
+                    alert('过期日期必须大于当前时间');
+                    e.preventDefault();
+                    return;
+                }
+            }
+
+            // 如果有文件上传，显示进度条
+            if (file) {
+                uploadProgress.style.display = 'block';
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>上传中...';
+                
+                // 模拟进度条（实际项目中应该使用真实的上传进度）
+                let progress = 0;
+                const progressBar = uploadProgress.querySelector('.progress-bar');
+                const interval = setInterval(() => {
+                    progress += Math.random() * 15;
+                    if (progress > 90) {
+                        progress = 90;
+                        clearInterval(interval);
+                    }
+                    progressBar.style.width = progress + '%';
+                }, 200);
+            }
+        });
+
+        // 表单验证
+        const inputs = form.querySelectorAll('input[required], textarea[required]');
+        inputs.forEach(input => {
+            input.addEventListener('blur', function() {
+                if (this.value.trim() === '') {
+                    this.classList.add('is-invalid');
+                } else {
+                    this.classList.remove('is-invalid');
+                    this.classList.add('is-valid');
+                }
+            });
+        });
+    });
+</script>
+{% endblock %}

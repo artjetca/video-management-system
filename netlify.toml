@@ -1,0 +1,50 @@
+[build]
+  command = "pip install -r requirements.txt"
+  publish = "."
+
+[build.environment]
+  PYTHON_VERSION = "3.11"
+
+# Redirect API routes to Flask function
+[[redirects]]
+  from = "/api/*"
+  to = "/.netlify/functions/app/:splat"
+  status = 200
+
+# Redirect admin routes to Flask function
+[[redirects]]
+  from = "/login"
+  to = "/.netlify/functions/app/login"
+  status = 200
+
+[[redirects]]
+  from = "/dashboard"
+  to = "/.netlify/functions/app/dashboard"
+  status = 200
+
+[[redirects]]
+  from = "/videos*"
+  to = "/.netlify/functions/app/videos:splat"
+  status = 200
+
+[[redirects]]
+  from = "/add_video"
+  to = "/.netlify/functions/app/add_video"
+  status = 200
+
+[[redirects]]
+  from = "/edit_video/*"
+  to = "/.netlify/functions/app/edit_video/:splat"
+  status = 200
+
+# Fallback to static site
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+
+[functions]
+  directory = "netlify/functions"
+
+[functions."*"]
+  runtime = "python3.11"

@@ -1,0 +1,240 @@
+{% extends "base.html" %}
+
+{% block title %}视频列表 - 视频管理系统{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h1 class="h2">
+        <i class="fas fa-play-circle me-2 text-primary"></i>
+        {% if show_archived %}归档视频{% else %}视频列表{% endif %}
+    </h1>
+    <div class="btn-toolbar mb-2 mb-md-0">
+        {% if session.is_admin %}
+        <div class="btn-group me-2">
+            <a href="{{ url_for('add_video') }}" class="btn btn-sm btn-primary">
+                <i class="fas fa-plus-circle me-1"></i>
+                添加视频
+            </a>
+        </div>
+        {% endif %}
+        <div class="btn-group">
+            <a href="{{ url_for('videos') }}" class="btn btn-sm {% if not show_archived %}btn-primary{% else %}btn-outline-primary{% endif %}">
+                <i class="fas fa-play-circle me-1"></i>
+                活跃视频
+            </a>
+            <a href="{{ url_for('videos', archived=1) }}" class="btn btn-sm {% if show_archived %}btn-warning{% else %}btn-outline-warning{% endif %}">
+                <i class="fas fa-archive me-1"></i>
+                归档视频
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- 搜索栏 -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body">
+                <form method="GET" class="row g-3">
+                    <div class="col-md-8">
+                        <div class="input-group">
+                            <span class="input-group-text">
+                                <i class="fas fa-search"></i>
+                            </span>
+                            <input type="text" class="form-control" name="search" value="{{ search }}" placeholder="搜索视频标题或描述...">
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="d-flex gap-2">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-search me-1"></i>
+                                搜索
+                            </button>
+                            <a href="{{ url_for('videos', archived=show_archived|int) }}" class="btn btn-outline-secondary">
+                                <i class="fas fa-times me-1"></i>
+                                清除
+                            </a>
+                        </div>
+                    </div>
+                    {% if show_archived %}
+                    <input type="hidden" name="archived" value="1">
+                    {% endif %}
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 视频列表 -->
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-list me-2"></i>
+                    视频列表 ({{ videos|length }} 个视频)
+                </h5>
+            </div>
+            <div class="card-body">
+                {% if videos %}
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead class="table-light">
+                            <tr>
+                                <th>标题</th>
+                                <th>描述</th>
+                                <th>过期日期</th>
+                                <th>观看次数</th>
+                                <th>状态</th>
+                                <th>操作</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for video in videos %}
+                            <tr>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <i class="fas fa-video text-primary me-2"></i>
+                                        <div>
+                                            <strong>{{ video[1] }}</strong>
+                                            {% if video[3] %}
+                                            <br><small class="text-muted">文件: {{ video[3] }}</small>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <span class="text-muted">
+                                        {{ video[2][:100] + '...' if video[2] and video[2]|length > 100 else video[2] or '无描述' }}
+                                    </span>
+                                </td>
+                                <td>
+                                    {% if video[7] %}
+                                        {% set expiry_datetime = video[7] %}
+                                        {% if expiry_datetime %}
+                                            <small class="text-warning">
+                                                <i class="fas fa-clock me-1"></i>
+                                                {{ expiry_datetime }}
+                                            </small>
+                                        {% endif %}
+                                    {% else %}
+                                        <small class="text-muted">-</small>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <span class="badge bg-info">
+                                        <i class="fas fa-eye me-1"></i>
+                                        {{ video[8] or 0 }} 次
+                                    </span>
+                                </td>
+                                <td>
+                                    {% if video[6] %}
+                                        <span class="badge bg-warning">
+                                            <i class="fas fa-archive me-1"></i>
+                                            已归档
+                                        </span>
+                                    {% elif video[7] and video[7] < moment().format('YYYY-MM-DD HH:mm:ss') %}
+                                        <span class="badge bg-danger">
+                                            <i class="fas fa-clock me-1"></i>
+                                            已过期
+                                        </span>
+                                    {% else %}
+                                        <span class="badge bg-success">
+                                            <i class="fas fa-check-circle me-1"></i>
+                                            活跃
+                                        </span>
+                                    {% endif %}
+                                    {% if not video[8] %}
+                                        <span class="badge bg-secondary ms-1">
+                                            <i class="fas fa-ban me-1"></i>
+                                            禁止下载
+                                        </span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <div class="btn-group btn-group-sm">
+                                        {% if not video[6] and (not video[7] or video[7] >= moment().format('YYYY-MM-DD HH:mm:ss')) %}
+                                        <a href="{{ url_for('watch_video', video_id=video[0]) }}" class="btn btn-primary" title="播放">
+                                            <i class="fas fa-play"></i>
+                                        </a>
+                                        {% endif %}
+                                        {% if session.is_admin %}
+                                        <a href="{{ url_for('edit_video', video_id=video[0]) }}" class="btn btn-outline-primary" title="编辑">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                        {% if video[6] %}
+                                            <a href="{{ url_for('restore_video', video_id=video[0]) }}" class="btn btn-outline-success" title="恢复" onclick="return confirm('确定要恢复这个视频吗？')">
+                                                <i class="fas fa-undo"></i>
+                                            </a>
+                                        {% else %}
+                                            <a href="{{ url_for('archive_video', video_id=video[0]) }}" class="btn btn-outline-warning" title="归档" onclick="return confirm('确定要归档这个视频吗？')">
+                                                <i class="fas fa-archive"></i>
+                                            </a>
+                                        {% endif %}
+                                        <a href="{{ url_for('delete_video', video_id=video[0]) }}" class="btn btn-outline-danger" title="删除" onclick="return confirm('确定要永久删除这个视频吗？此操作不可撤销！')">
+                                            <i class="fas fa-trash"></i>
+                                        </a>
+                                        {% endif %}
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="text-center py-5">
+                    <i class="fas fa-{% if show_archived %}archive{% else %}video{% endif %} fa-4x text-muted mb-3"></i>
+                    <h5 class="text-muted">
+                        {% if search %}
+                            没有找到匹配的视频
+                        {% elif show_archived %}
+                            暂无归档视频
+                        {% else %}
+                            暂无视频
+                        {% endif %}
+                    </h5>
+                    <p class="text-muted">
+                        {% if search %}
+                            尝试使用不同的搜索关键词
+                        {% elif show_archived %}
+                            归档的视频将显示在这里
+                        {% else %}
+                            开始添加您的第一个视频吧！
+                        {% endif %}
+                    </p>
+                    {% if not show_archived and session.is_admin %}
+                    <a href="{{ url_for('add_video') }}" class="btn btn-primary">
+                        <i class="fas fa-plus-circle me-2"></i>
+                        添加视频
+                    </a>
+                    {% endif %}
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // 确认删除对话框
+    function confirmDelete(videoTitle) {
+        return confirm(`确定要永久删除视频 "${videoTitle}" 吗？此操作不可撤销！`);
+    }
+    
+    // 表格行悬停效果
+    document.addEventListener('DOMContentLoaded', function() {
+        const rows = document.querySelectorAll('tbody tr');
+        rows.forEach(row => {
+            row.addEventListener('mouseenter', function() {
+                this.style.backgroundColor = '#f8f9fa';
+            });
+            row.addEventListener('mouseleave', function() {
+                this.style.backgroundColor = '';
+            });
+        });
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,191 @@
+{% extends "base.html" %}
+
+{% block title %}观看视频 - {{ video[1] }}{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h1 class="h2">
+        <i class="fas fa-play me-2 text-primary"></i>
+        {{ video[1] }}
+    </h1>
+    <div class="btn-toolbar mb-2 mb-md-0">
+        <div class="btn-group me-2">
+            <a href="{{ url_for('videos') }}" class="btn btn-sm btn-outline-secondary">
+                <i class="fas fa-arrow-left me-1"></i>
+                返回列表
+            </a>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-8">
+        <!-- 视频播放器 -->
+        <div class="card mb-4">
+            <div class="card-body p-0">
+                {% if video_url %}
+                <div class="ratio ratio-16x9">
+                    <iframe 
+                        src="{{ video_url }}" 
+                        frameborder="0" 
+                        allowfullscreen
+                        style="border-radius: 0.5rem;"
+                        oncontextmenu="return false;"
+                        controlsList="nodownload">
+                    </iframe>
+                </div>
+                {% else %}
+                <div class="text-center py-5">
+                    <i class="fas fa-exclamation-triangle fa-3x text-warning mb-3"></i>
+                    <h5>视频暂时无法播放</h5>
+                    <p class="text-muted">请检查 Google Drive 链接是否有效</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- 视频描述 -->
+        {% if video[2] %}
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-info-circle me-2"></i>
+                    视频描述
+                </h5>
+            </div>
+            <div class="card-body">
+                <p class="card-text">{{ video[2] }}</p>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    <div class="col-lg-4">
+        <!-- 视频信息 -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-info me-2"></i>
+                    视频信息
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row mb-3">
+                    <div class="col-sm-4">
+                        <strong>观看次数:</strong>
+                    </div>
+                    <div class="col-sm-8">
+                        <span class="badge bg-primary">{{ video[6] + 1 }} 次</span>
+                    </div>
+                </div>
+
+                {% if video[4] %}
+                <div class="row mb-3">
+                    <div class="col-sm-4">
+                        <strong>过期时间:</strong>
+                    </div>
+                    <div class="col-sm-8">
+                        <span class="badge bg-warning">
+                            <i class="fas fa-clock me-1"></i>
+                            {{ video[4] }}
+                        </span>
+                    </div>
+                </div>
+                {% endif %}
+
+                <div class="row mb-3">
+                    <div class="col-sm-4">
+                        <strong>下载权限:</strong>
+                    </div>
+                    <div class="col-sm-8">
+                        {% if video[5] %}
+                            <span class="badge bg-success">
+                                <i class="fas fa-download me-1"></i>
+                                允许下载
+                            </span>
+                        {% else %}
+                            <span class="badge bg-danger">
+                                <i class="fas fa-ban me-1"></i>
+                                禁止下载
+                            </span>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 安全提示 -->
+        <div class="card border-warning">
+            <div class="card-header bg-warning text-dark">
+                <h6 class="mb-0">
+                    <i class="fas fa-shield-alt me-2"></i>
+                    版权保护
+                </h6>
+            </div>
+            <div class="card-body">
+                <p class="card-text small">
+                    <i class="fas fa-exclamation-triangle me-1"></i>
+                    此视频受版权保护，禁止未经授权的下载、复制或传播。
+                </p>
+                {% if not video[5] %}
+                <p class="card-text small text-muted">
+                    <i class="fas fa-lock me-1"></i>
+                    管理员已禁用下载功能以保护内容安全。
+                </p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // 禁用右键菜单
+    document.addEventListener('contextmenu', function(e) {
+        e.preventDefault();
+        return false;
+    });
+
+    // 禁用开发者工具快捷键
+    document.addEventListener('keydown', function(e) {
+        // 禁用 F12, Ctrl+Shift+I, Ctrl+Shift+J, Ctrl+U
+        if (e.keyCode === 123 || 
+            (e.ctrlKey && e.shiftKey && (e.keyCode === 73 || e.keyCode === 74)) ||
+            (e.ctrlKey && e.keyCode === 85)) {
+            e.preventDefault();
+            return false;
+        }
+    });
+
+    // 禁用选择文本
+    document.addEventListener('selectstart', function(e) {
+        e.preventDefault();
+        return false;
+    });
+
+    // 禁用拖拽
+    document.addEventListener('dragstart', function(e) {
+        e.preventDefault();
+        return false;
+    });
+
+    // 监控视频播放
+    document.addEventListener('DOMContentLoaded', function() {
+        const iframe = document.querySelector('iframe');
+        if (iframe) {
+            // 添加额外的安全属性
+            iframe.setAttribute('sandbox', 'allow-scripts allow-same-origin allow-presentation');
+            
+            // 监听消息以防止下载
+            window.addEventListener('message', function(event) {
+                // 阻止可能的下载请求
+                if (event.data && typeof event.data === 'string' && event.data.includes('download')) {
+                    event.stopPropagation();
+                    return false;
+                }
+            });
+        }
+    });
+</script>
+{% endblock %}

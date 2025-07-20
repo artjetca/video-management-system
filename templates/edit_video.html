@@ -1,0 +1,238 @@
+{% extends "base.html" %}
+
+{% block title %}编辑视频 - 视频管理系统{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h1 class="h2">
+        <i class="fas fa-edit me-2 text-primary"></i>
+        编辑视频
+    </h1>
+    <div class="btn-toolbar mb-2 mb-md-0">
+        <div class="btn-group me-2">
+            <a href="{{ url_for('videos') }}" class="btn btn-sm btn-outline-secondary">
+                <i class="fas fa-arrow-left me-1"></i>
+                返回列表
+            </a>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-8 mx-auto">
+        <div class="card shadow">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">
+                    <i class="fas fa-video me-2"></i>
+                    编辑视频信息
+                </h5>
+            </div>
+            <div class="card-body">
+                <form method="POST" id="editVideoForm">
+                    <div class="row">
+                        <div class="col-md-12 mb-3">
+                            <label for="title" class="form-label">
+                                <i class="fas fa-heading me-2"></i>
+                                视频标题 <span class="text-danger">*</span>
+                            </label>
+                            <input type="text" class="form-control form-control-lg" id="title" name="title" value="{{ video[1] }}" required placeholder="输入视频标题...">
+                            <div class="form-text">请输入一个描述性的视频标题</div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-12 mb-3">
+                            <label for="description" class="form-label">
+                                <i class="fas fa-align-left me-2"></i>
+                                视频描述
+                            </label>
+                            <textarea class="form-control" id="description" name="description" rows="4" placeholder="输入视频描述...">{{ video[2] or '' }}</textarea>
+                            <div class="form-text">详细描述视频内容，帮助其他用户了解视频</div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-12 mb-4">
+                            <label for="google_drive_url" class="form-label">
+                                <i class="fab fa-google-drive me-2"></i>
+                                Google Drive 链接
+                            </label>
+                            <input type="url" class="form-control" id="google_drive_url" name="google_drive_url" value="{{ video[4] or '' }}" placeholder="https://drive.google.com/...">
+                            <div class="form-text">
+                                <i class="fas fa-info-circle me-1"></i>
+                                如果视频存储在 Google Drive 上，请提供共享链接
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 当前文件信息 -->
+                    {% if video[3] %}
+                    <div class="row">
+                        <div class="col-md-12 mb-4">
+                            <div class="alert alert-info">
+                                <h6 class="alert-heading">
+                                    <i class="fas fa-file-video me-2"></i>
+                                    当前上传的文件
+                                </h6>
+                                <p class="mb-0">
+                                    <strong>文件名：</strong> {{ video[3] }}<br>
+                                    <strong>上传时间：</strong> {{ video[5] }}
+                                </p>
+                                <hr>
+                                <p class="mb-0">
+                                    <small class="text-muted">
+                                        <i class="fas fa-info-circle me-1"></i>
+                                        注意：目前不支持更换已上传的文件。如需更换文件，请删除当前视频并重新添加。
+                                    </small>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <!-- 视频状态信息 -->
+                    <div class="row">
+                        <div class="col-md-12 mb-4">
+                            <div class="card bg-light">
+                                <div class="card-body">
+                                    <h6 class="card-title">
+                                        <i class="fas fa-info-circle me-2"></i>
+                                        视频状态
+                                    </h6>
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <strong>状态：</strong>
+                                            {% if video[6] %}
+                                                <span class="badge bg-warning">
+                                                    <i class="fas fa-archive me-1"></i>
+                                                    已归档
+                                                </span>
+                                            {% else %}
+                                                <span class="badge bg-success">
+                                                    <i class="fas fa-check-circle me-1"></i>
+                                                    活跃
+                                                </span>
+                                            {% endif %}
+                                        </div>
+                                        <div class="col-md-6">
+                                            <strong>上传时间：</strong> {{ video[5] }}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <a href="{{ url_for('videos') }}" class="btn btn-secondary">
+                                <i class="fas fa-times me-2"></i>
+                                取消
+                            </a>
+                        </div>
+                        <div>
+                            {% if video[6] %}
+                            <a href="{{ url_for('restore_video', video_id=video[0]) }}" class="btn btn-success me-2" onclick="return confirm('确定要恢复这个视频吗？')">
+                                <i class="fas fa-undo me-2"></i>
+                                恢复视频
+                            </a>
+                            {% else %}
+                            <a href="{{ url_for('archive_video', video_id=video[0]) }}" class="btn btn-warning me-2" onclick="return confirm('确定要归档这个视频吗？')">
+                                <i class="fas fa-archive me-2"></i>
+                                归档视频
+                            </a>
+                            {% endif %}
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="fas fa-save me-2"></i>
+                                保存更改
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- 危险操作区域 -->
+        <div class="card mt-4 border-danger">
+            <div class="card-header bg-danger text-white">
+                <h5 class="mb-0">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    危险操作
+                </h5>
+            </div>
+            <div class="card-body">
+                <p class="text-muted">
+                    以下操作是不可逆的，请谨慎操作。
+                </p>
+                <a href="{{ url_for('delete_video', video_id=video[0]) }}" class="btn btn-danger" onclick="return confirm('确定要永久删除这个视频吗？此操作不可撤销！\n\n视频标题：{{ video[1] }}')">
+                    <i class="fas fa-trash me-2"></i>
+                    永久删除视频
+                </a>
+                <small class="d-block mt-2 text-muted">
+                    删除后，视频文件和所有相关信息将被永久删除，无法恢复。
+                </small>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const form = document.getElementById('editVideoForm');
+
+        // 表单提交处理
+        form.addEventListener('submit', function(e) {
+            const title = document.getElementById('title').value.trim();
+
+            if (!title) {
+                alert('请输入视频标题');
+                e.preventDefault();
+                return;
+            }
+
+            // 确认保存
+            if (!confirm('确定要保存这些更改吗？')) {
+                e.preventDefault();
+                return;
+            }
+        });
+
+        // 表单验证
+        const inputs = form.querySelectorAll('input[required], textarea[required]');
+        inputs.forEach(input => {
+            input.addEventListener('blur', function() {
+                if (this.value.trim() === '') {
+                    this.classList.add('is-invalid');
+                } else {
+                    this.classList.remove('is-invalid');
+                    this.classList.add('is-valid');
+                }
+            });
+        });
+
+        // 检测表单更改
+        let formChanged = false;
+        const formElements = form.querySelectorAll('input, textarea');
+        formElements.forEach(element => {
+            element.addEventListener('input', function() {
+                formChanged = true;
+            });
+        });
+
+        // 页面离开提醒
+        window.addEventListener('beforeunload', function(e) {
+            if (formChanged) {
+                e.preventDefault();
+                e.returnValue = '';
+            }
+        });
+
+        // 表单提交时不显示离开提醒
+        form.addEventListener('submit', function() {
+            formChanged = false;
+        });
+    });
+</script>
+{% endblock %}
