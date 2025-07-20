@@ -133,7 +133,7 @@
                                             <i class="fas fa-archive me-1"></i>
                                              Archivado
                                         </span>
-                                    {% elif video[7] and video[7] < moment().format('YYYY-MM-DD HH:mm:ss') %}
+                                    {% elif video[7] and video[7]|is_expired %}
                                         <span class="badge bg-danger">
                                             <i class="fas fa-clock me-1"></i>
                                              Expirado
@@ -153,7 +153,7 @@
                                 </td>
                                 <td>
                                     <div class="btn-group btn-group-sm">
-                                        {% if not video[6] and (not video[7] or video[7] >= moment().format('YYYY-MM-DD HH:mm:ss')) %}
+                                        {% if not video[6] and (not video[7] or not video[7]|is_expired) %}
                                          <a href="{{ url_for('watch_video', video_id=video[0]) }}" class="btn btn-primary" title="Reproducir">
                                             <i class="fas fa-play"></i>
                                         </a>

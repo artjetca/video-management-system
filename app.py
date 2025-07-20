@@ -8,10 +8,17 @@ import uuid
 from config import config
 
 app = Flask(__name__)
+app.secret_key = os.environ.get('SECRET_KEY', 'dev-secret-key-change-in-production')
 
 # 配置应用
 config_name = os.environ.get('FLASK_ENV', 'development')
 app.config.from_object(config.get(config_name, config['default']))
+
+# 添加模板函数
+@app.template_filter('is_expired')
+def is_expired_filter(expiry_date):
+    """检查视频是否过期"""
+    return is_video_expired(expiry_date)
 
 # 确保上传目录存在
 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
@@ -196,7 +203,8 @@ def dashboard():
     return render_template('dashboard.html', 
                          active_videos=active_videos,
                          archived_videos=archived_videos,
-                         recent_videos=recent_videos)
+                         recent_videos=recent_videos,
+                         current_date=datetime.now().strftime('%Y-%m-%d'))
 
 @app.route('/videos')
 @login_required
