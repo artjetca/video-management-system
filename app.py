@@ -52,6 +52,7 @@ def init_db():
         is_archived BOOLEAN DEFAULT 0,
         allow_download BOOLEAN DEFAULT 0,
         view_count INTEGER DEFAULT 0,
+        sort_order INTEGER DEFAULT 0,
         created_by INTEGER,
         FOREIGN KEY (created_by) REFERENCES users (id)
     )''')
@@ -61,6 +62,14 @@ def init_db():
     c.execute('''INSERT OR IGNORE INTO users (username, email, password_hash, is_admin) 
                  VALUES (?, ?, ?, ?)''', 
               ('admin', 'admin@example.com', admin_password_hash, True))
+    
+    # 数据库迁移：为现有视频添加排序字段
+    try:
+        c.execute('ALTER TABLE videos ADD COLUMN sort_order INTEGER DEFAULT 0')
+        # 为现有视频设置排序顺序
+        c.execute('UPDATE videos SET sort_order = id WHERE sort_order = 0')
+    except:
+        pass  # 字段已存在
     
     conn.commit()
     conn.close()
@@ -149,7 +158,7 @@ def index():
     c.execute('''SELECT id, title, description, upload_date, expiry_date, view_count 
                  FROM videos 
                  WHERE is_archived = 0 
-                 ORDER BY upload_date DESC''')
+                 ORDER BY sort_order ASC, upload_date DESC''')
     videos = c.fetchall()
     conn.close()
     
@@ -226,7 +235,7 @@ def videos():
     search = request.args.get('search', '')
     show_archived = request.args.get('archived', '0') == '1'
     
-    query = '''SELECT id, title, description, filename, google_drive_url, upload_date, is_archived, expiry_date, allow_download, google_drive_file_id 
+    query = '''SELECT id, title, description, filename, google_drive_url, upload_date, is_archived, expiry_date, allow_download, google_drive_file_id, sort_order 
                FROM videos 
                WHERE is_archived = ? '''
     params = [1 if show_archived else 0]
@@ -235,7 +244,7 @@ def videos():
         query += ' AND (title LIKE ? OR description LIKE ?)'
         params.extend([f'%{search}%', f'%{search}%'])
     
-    query += ' ORDER BY upload_date DESC'
+    query += ' ORDER BY sort_order ASC, upload_date DESC'
     
     c.execute(query, params)
     videos = c.fetchall()
@@ -281,13 +290,18 @@ def add_video():
         # 保存到数据库
         conn = sqlite3.connect('video_management.db')
         c = conn.cursor()
-        c.execute('''INSERT INTO videos (title, description, filename, google_drive_url, google_drive_file_id, expiry_date, allow_download, created_by) 
-                     VALUES (?, ?, ?, ?, ?, ?, ?, ?)''',
-                  (title, description, filename, google_drive_url, google_drive_file_id, expiry_date or None, allow_download, session['user_id']))
+        
+        # 获取最大的排序号
+        c.execute('SELECT MAX(sort_order) FROM videos')
+        max_order = c.fetchone()[0] or 0
+        
+        c.execute('''INSERT INTO videos (title, description, filename, google_drive_url, google_drive_file_id, expiry_date, allow_download, sort_order, created_by) 
+                     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)''',
+                  (title, description, filename, google_drive_url, google_drive_file_id, expiry_date or None, allow_download, max_order + 1, session['user_id']))
         conn.commit()
         conn.close()
         
-        flash('视频添加成功！', 'success')
+        flash('¡Video agregado exitosamente!', 'success')
         return redirect(url_for('videos'))
     
     return render_template('add_video.html')
@@ -383,6 +397,64 @@ def watch_video(video_id):
         return render_template('watch_video.html', video=video, video_url=protected_url)
     else:
         return render_template('public_watch_video.html', video=video, video_url=protected_url)
+
+@app.route('/move_video_up/<int:video_id>')
+@admin_required
+def move_video_up(video_id):
+    conn = sqlite3.connect('video_management.db')
+    c = conn.cursor()
+    
+    # 获取当前视频的排序
+    c.execute('SELECT sort_order FROM videos WHERE id = ?', (video_id,))
+    result = c.fetchone()
+    if not result:
+        conn.close()
+        return redirect(url_for('videos'))
+    
+    current_order = result[0]
+    
+    # 找到上一个视频
+    c.execute('SELECT id, sort_order FROM videos WHERE sort_order < ? ORDER BY sort_order DESC LIMIT 1', (current_order,))
+    prev_video = c.fetchone()
+    
+    if prev_video:
+        # 交换排序
+        c.execute('UPDATE videos SET sort_order = ? WHERE id = ?', (prev_video[1], video_id))
+        c.execute('UPDATE videos SET sort_order = ? WHERE id = ?', (current_order, prev_video[0]))
+        conn.commit()
+        flash('Video movido hacia arriba', 'success')
+    
+    conn.close()
+    return redirect(url_for('videos'))
+
+@app.route('/move_video_down/<int:video_id>')
+@admin_required
+def move_video_down(video_id):
+    conn = sqlite3.connect('video_management.db')
+    c = conn.cursor()
+    
+    # 获取当前视频的排序
+    c.execute('SELECT sort_order FROM videos WHERE id = ?', (video_id,))
+    result = c.fetchone()
+    if not result:
+        conn.close()
+        return redirect(url_for('videos'))
+    
+    current_order = result[0]
+    
+    # 找到下一个视频
+    c.execute('SELECT id, sort_order FROM videos WHERE sort_order > ? ORDER BY sort_order ASC LIMIT 1', (current_order,))
+    next_video = c.fetchone()
+    
+    if next_video:
+        # 交换排序
+        c.execute('UPDATE videos SET sort_order = ? WHERE id = ?', (next_video[1], video_id))
+        c.execute('UPDATE videos SET sort_order = ? WHERE id = ?', (current_order, next_video[0]))
+        conn.commit()
+        flash('Video movido hacia abajo', 'success')
+    
+    conn.close()
+    return redirect(url_for('videos'))
 
 @app.route('/delete_video/<int:video_id>')
 @admin_required
