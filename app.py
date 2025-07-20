@@ -141,9 +141,19 @@ def get_protected_video_url(file_id, allow_download=False):
 
 @app.route('/')
 def index():
-    if 'user_id' in session:
-        return redirect(url_for('dashboard'))
-    return redirect(url_for('login'))
+    # 公开视频列表页面，不需要登录
+    conn = sqlite3.connect('video_management.db')
+    c = conn.cursor()
+    
+    # 获取所有活跃的视频
+    c.execute('''SELECT id, title, description, upload_date, expiry_date, view_count 
+                 FROM videos 
+                 WHERE is_archived = 0 
+                 ORDER BY upload_date DESC''')
+    videos = c.fetchall()
+    conn.close()
+    
+    return render_template('public_videos.html', videos=videos)
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -339,7 +349,6 @@ def restore_video(video_id):
     return redirect(url_for('videos'))
 
 @app.route('/watch_video/<int:video_id>')
-@login_required
 def watch_video(video_id):
     conn = sqlite3.connect('video_management.db')
     c = conn.cursor()
@@ -351,13 +360,15 @@ def watch_video(video_id):
     video = c.fetchone()
     
     if not video:
-        flash('视频不存在或已被删除', 'error')
-        return redirect(url_for('videos'))
+        return render_template('error.html', 
+                             message='Video no encontrado o ha sido eliminado',
+                             title='Video No Encontrado')
     
     # 检查视频是否过期
     if is_video_expired(video[4]):
-        flash('视频已过期，无法播放', 'error')
-        return redirect(url_for('videos'))
+        return render_template('error.html',
+                             message='Este video ha expirado y no se puede reproducir',
+                             title='Video Expirado')
     
     # 更新观看次数
     c.execute('UPDATE videos SET view_count = view_count + 1 WHERE id = ?', (video_id,))
@@ -367,7 +378,11 @@ def watch_video(video_id):
     # 生成受保护的视频链接
     protected_url = get_protected_video_url(video[3], video[5])
     
-    return render_template('watch_video.html', video=video, video_url=protected_url)
+    # 根据用户是否登录显示不同的模板
+    if 'user_id' in session:
+        return render_template('watch_video.html', video=video, video_url=protected_url)
+    else:
+        return render_template('public_watch_video.html', video=video, video_url=protected_url)
 
 @app.route('/delete_video/<int:video_id>')
 @admin_required
